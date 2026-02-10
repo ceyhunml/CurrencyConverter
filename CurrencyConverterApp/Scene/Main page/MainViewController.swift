@@ -9,7 +9,7 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    private let amountTextField: UITextField = {
+    private lazy var amountTextField: UITextField = {
         let tf = UITextField()
         tf.keyboardType = .decimalPad
         tf.placeholder = "Enter Amount"
@@ -26,7 +26,7 @@ class MainViewController: UIViewController {
         return tf
     }()
     
-    private let resultTextField: UITextField = {
+    private lazy var resultTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Result"
         tf.textAlignment = .center
@@ -43,7 +43,7 @@ class MainViewController: UIViewController {
         return tf
     }()
     
-    private let fromButton: UIButton = {
+    private lazy var fromButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Select FROM currency ⌄", for: .normal)
         button.tintColor = .systemIndigo
@@ -52,7 +52,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    private let toButton: UIButton = {
+    private lazy var toButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Select TO currency ⌄", for: .normal)
         button.tintColor = .systemTeal
@@ -61,7 +61,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    private let swapButton: UIButton = {
+    private lazy var swapButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 42, weight: .bold)
         config.image = UIImage(systemName: "arrow.up.arrow.down.circle.fill", withConfiguration: imageConfig)
@@ -73,7 +73,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    private let exchangeButton: UIButton = {
+    private lazy var exchangeButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.title = "Exchange"
         config.baseBackgroundColor = .systemBlue
@@ -96,7 +96,7 @@ class MainViewController: UIViewController {
         return exchangeButton
     }()
     
-    let viewModel = MainViewModel()
+    private let viewModel = MainViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,11 +105,12 @@ class MainViewController: UIViewController {
         fromButton.addTarget(self, action: #selector(fromTapped), for: .touchUpInside)
         toButton.addTarget(self, action: #selector(toTapped), for: .touchUpInside)
         swapButton.addTarget(self, action: #selector(swapCurrencies), for: .touchUpInside)
+        hideKeyboardWhenTappedAround()
         configureUI()
         doneButtonConfig()
     }
     
-    func doneButtonConfig() {
+    private func doneButtonConfig() {
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneTapped))
@@ -117,25 +118,25 @@ class MainViewController: UIViewController {
         amountTextField.inputAccessoryView = toolbar
     }
     
-    func parseAmount(_ text: String) -> Double? {
+    private func parseAmount(_ text: String) -> Double? {
         let formatter = NumberFormatter()
         formatter.locale = Locale.current
         return formatter.number(from: text)?.doubleValue
     }
     
-    @objc func doneTapped() {
+    @objc private func doneTapped() {
         view.endEditing(true)
     }
     
-    @objc func fromTapped() {
+    @objc private func fromTapped() {
         showCurrencySheet(for: fromButton, isFrom: true)
     }
     
-    @objc func toTapped() {
+    @objc private func toTapped() {
         showCurrencySheet(for: toButton, isFrom: true)
     }
     
-    func configureUI() {
+    private func configureUI() {
         view.addSubview(amountTextField)
         view.addSubview(resultTextField)
         view.addSubview(fromButton)
@@ -174,9 +175,9 @@ class MainViewController: UIViewController {
         ])
     }
     
-    @objc func showCurrencySheet(for button: UIButton, isFrom: Bool) {
+    @objc private func showCurrencySheet(for button: UIButton, isFrom: Bool) {
         let sheetVC = CurrencyListViewController()
-        sheetVC.onSelect = { selected in
+        sheetVC.viewModel.onSelect = { selected in
             button.setTitle(selected, for: .normal)
         }
         if let sheet = sheetVC.sheetPresentationController {
@@ -186,14 +187,14 @@ class MainViewController: UIViewController {
         present(sheetVC, animated: true)
     }
     
-    @objc func exchangeTapped(_ sender: UIButton) {
+    @objc private func exchangeTapped(_ sender: UIButton) {
         sender.animateTap {
             sender.configuration?.showsActivityIndicator = true
             self.performExchangeOperation()
         }
     }
     
-    @objc func swapCurrencies() {
+    @objc private func swapCurrencies() {
         UIView.animate(withDuration: 0.1, animations: {
             self.swapButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
         }) { _ in
@@ -218,7 +219,7 @@ class MainViewController: UIViewController {
         }
     }
     
-    @objc func performExchangeOperation() {
+    @objc private func performExchangeOperation() {
         guard let amountTF = amountTextField.text,
               let from = fromButton.titleLabel?.text,
               let to = toButton.titleLabel?.text else { return }
