@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 enum Endpoint: String {
     case currency = "latest"
 }
